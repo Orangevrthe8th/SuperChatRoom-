@@ -1,2102 +1,2006 @@
 ﻿<!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Chat</title>
-
-```
-<style>
-    :root {
-        --background: #111318;
-        --sidebar: #181a20;
-        --panel: #20232b;
-        --panel-light: #292d36;
-        --border: #343945;
-        --text: #f2f3f5;
-        --muted: #949ba8;
-        --accent: #5865f2;
-        --accent-hover: #4752c4;
-        --danger: #ed4245;
-        --success: #57f287;
-    }
-
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        margin: 0;
-        background: var(--background);
-        color: var(--text);
-        font-family: Arial, Helvetica, sans-serif;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    button,
-    input {
-        font: inherit;
-    }
-
-    button {
-        cursor: pointer;
-    }
-
-    .app {
-        display: flex;
-        height: 100vh;
-        width: 100%;
-    }
-
-    /* ==============================
-       LEFT SIDEBAR
-    ============================== */
-
-    .sidebar {
-        width: 260px;
-        min-width: 260px;
-        background: var(--sidebar);
-        border-right: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-    }
-
-    .brand {
-        padding: 20px;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .brand h1 {
-        margin: 0;
-        font-size: 20px;
-    }
-
-    .brand p {
-        margin: 7px 0 0;
-        color: var(--muted);
-        font-size: 12px;
-    }
-
-    .sidebar-section {
-        padding: 18px 14px 8px;
-    }
-
-    .section-title {
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: bold;
-        letter-spacing: 0.8px;
-        text-transform: uppercase;
-        padding: 0 8px 9px;
-    }
-
-    .room-list {
-        overflow-y: auto;
-        max-height: 270px;
-    }
-
-    .room-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 10px 10px;
-        margin-bottom: 3px;
-        border-radius: 6px;
-        color: #c8ccd5;
-        cursor: pointer;
-        transition: background 0.15s;
-    }
-
-    .room-item:hover {
-        background: #272a33;
-    }
-
-    .room-item.active {
-        background: #343944;
-        color: white;
-    }
-
-    .room-name {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .room-name::before {
-        content: "#";
-        color: var(--muted);
-        margin-right: 8px;
-    }
-
-    .private-badge {
-        font-size: 10px;
-        color: #f0c674;
-        border: 1px solid #6b5a32;
-        border-radius: 4px;
-        padding: 2px 4px;
-        flex-shrink: 0;
-    }
-
-    .create-room-button {
-        width: 100%;
-        border: none;
-        border-radius: 6px;
-        padding: 11px;
-        background: var(--accent);
-        color: white;
-        font-weight: bold;
-        margin-bottom: 8px;
-    }
-
-    .create-room-button:hover {
-        background: var(--accent-hover);
-    }
-
-    .room-help {
-        color: var(--muted);
-        font-size: 11px;
-        line-height: 1.4;
-        padding: 0 8px;
-    }
-
-    .member-section {
-        flex: 1;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .member-list {
-        overflow-y: auto;
-        padding: 0 14px 14px;
-    }
-
-    .member {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 7px 8px;
-        border-radius: 5px;
-    }
-
-    .member:hover {
-        background: #252830;
-    }
-
-    .avatar {
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 13px;
-        font-weight: bold;
-        user-select: none;
-    }
-
-    .member .avatar {
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
-        font-size: 11px;
-    }
-
-    .member-name {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 13px;
-        color: #d7dae0;
-    }
-
-    .online-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--success);
-        margin-left: auto;
-        flex-shrink: 0;
-    }
-
-    /* ==============================
-       MAIN AREA
-    ============================== */
-
-    .main {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .topbar {
-        height: 64px;
-        min-height: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 22px;
-        border-bottom: 1px solid var(--border);
-        background: var(--panel);
-    }
-
-    .room-heading {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        min-width: 0;
-    }
-
-    .room-hash {
-        font-size: 25px;
-        color: var(--muted);
-    }
-
-    .room-title {
-        font-size: 17px;
-        font-weight: bold;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .room-description {
-        color: var(--muted);
-        font-size: 12px;
-        margin-left: 8px;
-        white-space: nowrap;
-    }
-
-    .topbar-right {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .connection-status {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        color: var(--muted);
-        font-size: 12px;
-    }
-
-    .status-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: #777;
-    }
-
-    .status-dot.connected {
-        background: var(--success);
-    }
-
-    .status-dot.connecting {
-        background: #f0c674;
-    }
-
-    .status-dot.error {
-        background: var(--danger);
-    }
-
-    .member-count {
-        color: var(--muted);
-        font-size: 12px;
-    }
-
-    /* ==============================
-       CHAT MESSAGES
-    ============================== */
-
-    .messages {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        padding: 22px 25px;
-        background: var(--background);
-    }
-
-    .welcome {
-        margin: 25px 0 30px;
-    }
-
-    .welcome-icon {
-        width: 55px;
-        height: 55px;
-        border-radius: 50%;
-        background: var(--accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        margin-bottom: 15px;
-    }
-
-    .welcome h2 {
-        margin: 0 0 8px;
-        font-size: 25px;
-    }
-
-    .welcome p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-    }
-
-    .message {
-        display: flex;
-        gap: 12px;
-        padding: 7px 10px;
-        margin: 2px -10px;
-        border-radius: 5px;
-        transition: background 0.12s;
-    }
-
-    .message:hover {
-        background: #191c22;
-    }
-
-    .message-avatar {
-        margin-top: 2px;
-    }
-
-    .message-content {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .message-header {
-        display: flex;
-        align-items: baseline;
-        gap: 9px;
-        margin-bottom: 3px;
-    }
-
-    .message-author {
-        font-size: 14px;
-        font-weight: bold;
-    }
-
-    .message-time {
-        color: #727987;
-        font-size: 10px;
-    }
-
-    .message-text {
-        color: #d8dbe2;
-        font-size: 14px;
-        line-height: 1.45;
-        white-space: pre-wrap;
-        word-break: break-word;
-    }
-
-    .system-message {
-        color: #727987;
-        font-size: 12px;
-        text-align: center;
-        margin: 14px 0;
-        font-style: italic;
-    }
-
-    .empty-room {
-        color: var(--muted);
-        font-size: 13px;
-        text-align: center;
-        padding: 50px 20px;
-    }
-
-    /* ==============================
-       MESSAGE INPUT
-    ============================== */
-
-    .input-wrapper {
-        padding: 0 25px 22px;
-        background: var(--background);
-    }
-
-    .message-form {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--panel-light);
-        border-radius: 8px;
-        padding: 5px 6px 5px 15px;
-        border: 1px solid transparent;
-    }
-
-    .message-form:focus-within {
-        border-color: #4b5263;
-    }
-
-    .message-input {
-        flex: 1;
-        min-width: 0;
-        background: transparent;
-        border: none;
-        outline: none;
-        color: white;
-        padding: 11px 0;
-        font-size: 14px;
-    }
-
-    .message-input::placeholder {
-        color: #777e8d;
-    }
-
-    .send-button {
-        border: none;
-        border-radius: 6px;
-        padding: 10px 16px;
-        background: var(--accent);
-        color: white;
-        font-weight: bold;
-    }
-
-    .send-button:hover {
-        background: var(--accent-hover);
-    }
-
-    .send-button:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-    }
-
-    .input-hint {
-        color: #656c79;
-        font-size: 10px;
-        margin-top: 7px;
-        text-align: right;
-    }
-
-    /* ==============================
-       MODALS
-    ============================== */
-
-    .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.72);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-        padding: 20px;
-    }
-
-    .modal-overlay.visible {
-        display: flex;
-    }
-
-    .modal {
-        width: 100%;
-        max-width: 430px;
-        background: #242731;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 25px;
-        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-    }
-
-    .modal h2 {
-        margin: 0 0 8px;
-        font-size: 21px;
-    }
-
-    .modal-description {
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.5;
-        margin-bottom: 22px;
-    }
-
-    .form-label {
-        display: block;
-        color: #cbd0da;
-        font-size: 12px;
-        font-weight: bold;
-        margin-bottom: 7px;
-    }
-
-    .form-group {
-        margin-bottom: 17px;
-    }
-
-    .form-input {
-        width: 100%;
-        background: #17191f;
-        border: 1px solid #414755;
-        border-radius: 6px;
-        color: white;
-        padding: 11px;
-        outline: none;
-    }
-
-    .form-input:focus {
-        border-color: var(--accent);
-    }
-
-    .privacy-options {
-        display: flex;
-        gap: 10px;
-    }
-
-    .privacy-option {
-        flex: 1;
-        background: #1b1e25;
-        border: 1px solid #414755;
-        border-radius: 7px;
-        padding: 12px;
-        cursor: pointer;
-    }
-
-    .privacy-option.selected {
-        border-color: var(--accent);
-        background: #2c3150;
-    }
-
-    .privacy-option input {
-        display: none;
-    }
-
-    .privacy-option strong {
-        display: block;
-        font-size: 13px;
-        margin-bottom: 5px;
-    }
-
-    .privacy-option span {
-        color: var(--muted);
-        font-size: 11px;
-        line-height: 1.4;
-    }
-
-    .modal-buttons {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 24px;
-    }
-
-    .cancel-button {
-        background: transparent;
-        color: #cbd0da;
-        border: none;
-        padding: 10px 15px;
-    }
-
-    .confirm-button {
-        background: var(--accent);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 10px 18px;
-        font-weight: bold;
-    }
-
-    .confirm-button:hover {
-        background: var(--accent-hover);
-    }
-
-    .error-text {
-        color: #ff7777;
-        font-size: 12px;
-        margin-top: 10px;
-        display: none;
-    }
-
-    /* ==============================
-       LOGIN OVERLAY
-    ============================== */
-
-    .login-overlay {
-        position: fixed;
-        inset: 0;
-        background: #111318;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 200;
-        padding: 20px;
-    }
-
-    .login-overlay.hidden {
-        display: none;
-    }
-
-    .login-box {
-        width: 100%;
-        max-width: 400px;
-        background: #20232b;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 32px;
-        text-align: center;
-    }
-
-    .login-logo {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        background: var(--accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 34px;
-        margin: 0 auto 20px;
-    }
-
-    .login-box h2 {
-        margin: 0 0 10px;
-    }
-
-    .login-box p {
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.5;
-        margin-bottom: 25px;
-    }
-
-    .login-box .form-input {
-        margin-bottom: 12px;
-        text-align: left;
-    }
-
-    .login-button {
-        width: 100%;
-        background: var(--accent);
-        border: none;
-        color: white;
-        border-radius: 6px;
-        padding: 12px;
-        font-weight: bold;
-    }
-
-    .login-button:hover {
-        background: var(--accent-hover);
-    }
-
-    .login-error {
-        color: #ff7777;
-        font-size: 12px;
-        margin-top: 12px;
-        min-height: 15px;
-    }
-
-    /* ==============================
-       TOAST
-    ============================== */
-
-    .toast {
-        position: fixed;
-        right: 25px;
-        bottom: 25px;
-        background: #2b2f39;
-        border: 1px solid var(--border);
-        color: white;
-        padding: 13px 17px;
-        border-radius: 7px;
-        font-size: 13px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        transform: translateY(20px);
-        opacity: 0;
-        pointer-events: none;
-        transition: all 0.2s;
-        z-index: 300;
-    }
-
-    .toast.visible {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    /* ==============================
-       MOBILE
-    ============================== */
-
-    @media (max-width: 700px) {
-        .sidebar {
-            width: 190px;
-            min-width: 190px;
+    <title>SuperChat</title>
+
+    <!-- Photon JavaScript SDK -->
+    <script src="./photon.min.js"></script>
+
+    <style>
+        :root {
+            --background: #0e1117;
+            --panel: #171b24;
+            --panel-light: #202633;
+            --panel-hover: #293141;
+            --border: #303847;
+            --text: #f1f5f9;
+            --muted: #98a2b3;
+            --accent: #5865f2;
+            --accent-hover: #4752c4;
+            --success: #3ba55d;
+            --danger: #ed4245;
+            --warning: #faa61a;
         }
 
-        .room-description {
-            display: none;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, #1d2330 0%, transparent 35%),
+                var(--background);
+            color: var(--text);
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .topbar {
-            padding: 0 14px;
-        }
-
-        .messages {
-            padding: 18px 15px;
-        }
-
-        .input-wrapper {
-            padding: 0 15px 15px;
-        }
-
-        .member-count {
-            display: none;
-        }
-    }
-
-    @media (max-width: 500px) {
-        .sidebar {
-            width: 145px;
-            min-width: 145px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            background: rgba(23, 27, 36, 0.95);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
         }
 
         .brand {
-            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
-        .brand h1 {
-            font-size: 16px;
+        .brand-icon {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            background: var(--accent);
+            color: white;
+            font-weight: 900;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .connection-indicator {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .connection-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--warning);
+            box-shadow: 0 0 10px rgba(250, 166, 26, 0.4);
+        }
+
+        .connection-dot.connected {
+            background: var(--success);
+            box-shadow: 0 0 10px rgba(59, 165, 93, 0.5);
+        }
+
+        .connection-dot.error {
+            background: var(--danger);
+            box-shadow: 0 0 10px rgba(237, 66, 69, 0.5);
+        }
+
+        .main {
+            width: min(1400px, 100%);
+            margin: 0 auto;
+            padding: 24px;
+            flex: 1;
+        }
+
+        .screen {
+            width: 100%;
+        }
+
+        .card {
+            background: rgba(23, 27, 36, 0.96);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.2);
+        }
+
+        .setup-card {
+            width: min(480px, 100%);
+            margin: 70px auto;
+            padding: 30px;
+        }
+
+        .setup-card h1 {
+            margin: 0 0 10px;
+            font-size: 28px;
+        }
+
+        .setup-card p {
+            color: var(--muted);
+            line-height: 1.6;
+            margin: 0 0 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #dce2ec;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: #10141c;
+            color: var(--text);
+            padding: 12px 13px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.18);
+        }
+
+        input::placeholder {
+            color: #687386;
+        }
+
+        .button {
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: 9px;
+            background: var(--accent);
+            color: white;
+            font-weight: 750;
+            transition: background 0.15s, transform 0.15s;
+        }
+
+        .button:hover {
+            background: var(--accent-hover);
+        }
+
+        .button:active {
+            transform: translateY(1px);
+        }
+
+        .button.secondary {
+            background: var(--panel-light);
+            border: 1px solid var(--border);
+        }
+
+        .button.secondary:hover {
+            background: var(--panel-hover);
+        }
+
+        .button.danger {
+            background: var(--danger);
+        }
+
+        .button.full {
+            width: 100%;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .setup-error {
+            color: #ff8e91;
+            background: rgba(237, 66, 69, 0.1);
+            border: 1px solid rgba(237, 66, 69, 0.3);
+            border-radius: 9px;
+            padding: 11px 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .room-layout {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr);
+            gap: 18px;
+            min-height: calc(100vh - 136px);
+        }
+
+        .sidebar {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
         }
 
         .sidebar-section {
-            padding-left: 8px;
-            padding-right: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
         }
 
-        .member-list {
-            padding-left: 8px;
-            padding-right: 8px;
+        .section-title {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .room-list {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            max-height: 390px;
+            overflow-y: auto;
         }
 
         .room-item {
-            padding: 9px 7px;
+            width: 100%;
+            padding: 11px 12px;
+            text-align: left;
+            border-radius: 9px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text);
+            transition: background 0.15s, border-color 0.15s;
         }
 
-        .topbar {
-            height: 55px;
-            min-height: 55px;
+        .room-item:hover {
+            background: var(--panel-hover);
+            border-color: var(--border);
         }
 
-        .room-title {
+        .room-item-name {
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .room-item-info {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .empty-state {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 8px 2px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px;
+            background: #10141c;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .profile-name {
+            min-width: 0;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile-status {
+            color: var(--success);
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .chat-panel {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chat-title {
+            min-width: 0;
+        }
+
+        .chat-title h2 {
+            margin: 0;
+            font-size: 18px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-subtitle {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .messages {
+            flex: 1;
+            min-height: 400px;
+            max-height: calc(100vh - 285px);
+            overflow-y: auto;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 11px;
+            max-width: 850px;
+        }
+
+        .message .avatar {
+            width: 36px;
+            height: 36px;
+            font-size: 13px;
+        }
+
+        .message-content {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: baseline;
+            gap: 9px;
+            margin-bottom: 4px;
+        }
+
+        .message-author {
             font-size: 14px;
+            font-weight: 800;
         }
 
-        .connection-status {
-            font-size: 0;
+        .message-time {
+            color: var(--muted);
+            font-size: 11px;
         }
 
-        .connection-status .status-dot {
-            width: 10px;
-            height: 10px;
+        .message-text {
+            color: #d7deea;
+            line-height: 1.5;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
         }
-    }
-</style>
-```
 
+        .system-message {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            padding: 4px 10px;
+        }
+
+        .system-message.error {
+            color: #ff8e91;
+        }
+
+        .composer {
+            padding: 16px 20px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .composer-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .composer-row input {
+            flex: 1;
+        }
+
+        .composer-help {
+            color: #697588;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .users-panel {
+            margin-top: 18px;
+            padding: 18px;
+        }
+
+        .users-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 13px;
+        }
+
+        .users-count {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .user-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            background: var(--panel-light);
+            color: #dce2ec;
+            font-size: 12px;
+        }
+
+        .user-chip .mini-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(7px);
+        }
+
+        .modal {
+            width: min(440px, 100%);
+            padding: 24px;
+        }
+
+        .modal h2 {
+            margin: 0 0 8px;
+            font-size: 21px;
+        }
+
+        .modal p {
+            margin: 0 0 20px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            margin-top: 20px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #dce2ec;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .checkbox-row input {
+            width: auto;
+            accent-color: var(--accent);
+        }
+
+        .toast-container {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            width: min(350px, calc(100vw - 40px));
+        }
+
+        .toast {
+            padding: 13px 15px;
+            background: #202633;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+            font-size: 13px;
+            line-height: 1.45;
+            animation: toastIn 0.2s ease-out;
+        }
+
+        .toast.error {
+            border-color: rgba(237, 66, 69, 0.55);
+        }
+
+        .toast.success {
+            border-color: rgba(59, 165, 93, 0.55);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .room-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                min-height: auto;
+            }
+
+            .room-list {
+                max-height: 180px;
+            }
+
+            .sidebar-bottom {
+                margin-top: 0;
+            }
+
+            .messages {
+                max-height: 60vh;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .main {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 0 14px;
+            }
+
+            .topbar-right {
+                font-size: 11px;
+            }
+
+            .chat-header {
+                padding: 13px;
+            }
+
+            .chat-header-actions .button {
+                padding: 0 10px;
+                font-size: 12px;
+            }
+
+            .messages {
+                padding: 15px;
+            }
+
+            .composer {
+                padding: 12px;
+            }
+
+            .composer-row {
+                flex-direction: column;
+            }
+
+            .composer-row .button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
+
 <body>
-
-```
-<!-- ==============================
-     LOGIN SCREEN
-============================== -->
-
-<div class="login-overlay" id="loginOverlay">
-    <div class="login-box">
-        <div class="login-logo">💬</div>
-
-        <h2>Welcome to Community Chat</h2>
-
-        <p>
-            Choose a display name to enter the chatroom.
-            No account is required for this demo.
-        </p>
-
-        <input
-            class="form-input"
-            id="usernameInput"
-            type="text"
-            maxlength="24"
-            placeholder="Display name"
-            autocomplete="off"
-        >
-
-        <button class="login-button" id="loginButton">
-            Enter Chat
-        </button>
-
-        <div class="login-error" id="loginError"></div>
-    </div>
-</div>
-
-<!-- ==============================
-     MAIN APP
-============================== -->
-
-<div class="app">
-
-    <aside class="sidebar">
-
-        <div class="brand">
-            <h1>Community Chat</h1>
-            <p>Powered by Photon Realtime</p>
-        </div>
-
-        <div class="sidebar-section">
-            <button
-                class="create-room-button"
-                id="createRoomButton"
-            >
-                + Create Room
-            </button>
-
-            <div class="section-title">
-                Available Rooms
-            </div>
-
-            <div class="room-list" id="roomList">
-                <div class="room-help">
-                    Connecting to Photon...
-                </div>
-            </div>
-        </div>
-
-        <div class="sidebar-section member-section">
-            <div class="section-title">
-                Members — <span id="memberCount">0</span>
-            </div>
-
-            <div class="member-list" id="memberList"></div>
-        </div>
-
-    </aside>
-
-    <main class="main">
-
+    <div class="app">
         <header class="topbar">
-
-            <div class="room-heading">
-                <span class="room-hash">#</span>
-                <span class="room-title" id="roomTitle">
-                    No room joined
-                </span>
-                <span class="room-description" id="roomDescription">
-                    Join or create a room to begin
-                </span>
+            <div class="brand">
+                <div class="brand-icon">S</div>
+                <span>SuperChat</span>
             </div>
 
             <div class="topbar-right">
-                <div class="member-count" id="topMemberCount">
-                    0 members
+                <div class="connection-indicator">
+                    <span id="connectionDot" class="connection-dot"></span>
+                    <span id="connectionText">Disconnected</span>
                 </div>
 
-                <div class="connection-status">
-                    <span
-                        class="status-dot"
-                        id="statusDot"
-                    ></span>
-
-                    <span id="statusText">
-                        Disconnected
-                    </span>
-                </div>
+                <span id="regionText">Region: --</span>
             </div>
-
         </header>
 
-        <section class="messages" id="messages">
+        <main class="main">
+            <!-- Username screen -->
+            <section id="setupScreen" class="screen">
+                <div class="card setup-card">
+                    <h1>Welcome to SuperChat</h1>
+                    <p>
+                        Choose a display name to enter the chatroom.
+                        Your name is only used for this session.
+                    </p>
 
-            <div class="welcome">
-                <div class="welcome-icon">💬</div>
-                <h2>Welcome to the chat!</h2>
-                <p>
-                    Join a room or create your own to start talking.
-                </p>
+                    <div id="setupError" class="setup-error hidden"></div>
+
+                    <div class="form-group">
+                        <label for="usernameInput">Display name</label>
+                        <input
+                            id="usernameInput"
+                            type="text"
+                            maxlength="24"
+                            placeholder="Enter your username..."
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <button id="enterChatButton" class="button full">
+                        Enter SuperChat
+                    </button>
+                </div>
+            </section>
+
+            <!-- Main chat screen -->
+            <section id="chatScreen" class="screen hidden">
+                <div class="room-layout">
+                    <aside class="card sidebar">
+                        <div class="sidebar-section">
+                            <div class="section-title">Rooms</div>
+
+                            <button id="createRoomButton" class="button full">
+                                + Create Room
+                            </button>
+
+                            <button id="joinRoomButton" class="button secondary full">
+                                Join by Room Name
+                            </button>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <div class="section-title">Public Rooms</div>
+                            <div id="roomList" class="room-list">
+                                <div class="empty-state">
+                                    Loading public rooms...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-bottom">
+                            <div class="profile-box">
+                                <div id="profileAvatar" class="avatar">?</div>
+
+                                <div>
+                                    <div id="profileName" class="profile-name">
+                                        Unknown
+                                    </div>
+
+                                    <div class="profile-status">
+                                        Online
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="disconnectButton" class="button danger full">
+                                Disconnect
+                            </button>
+                        </div>
+                    </aside>
+
+                    <div>
+                        <section class="card chat-panel">
+                            <header class="chat-header">
+                                <div class="chat-title">
+                                    <h2 id="currentRoomName">No room joined</h2>
+                                    <div id="currentRoomSubtitle" class="chat-subtitle">
+                                        Join or create a room to begin chatting.
+                                    </div>
+                                </div>
+
+                                <div class="chat-header-actions">
+                                    <button id="leaveRoomButton" class="button secondary" disabled>
+                                        Leave Room
+                                    </button>
+                                </div>
+                            </header>
+
+                            <div id="messages" class="messages">
+                                <div class="system-message">
+                                    Welcome to SuperChat.
+                                </div>
+                            </div>
+
+                            <div class="composer">
+                                <div class="composer-row">
+                                    <input
+                                        id="messageInput"
+                                        type="text"
+                                        maxlength="500"
+                                        placeholder="Join a room to send messages..."
+                                        autocomplete="off"
+                                        disabled
+                                    >
+
+                                    <button id="sendButton" class="button" disabled>
+                                        Send
+                                    </button>
+                                </div>
+
+                                <div class="composer-help">
+                                    Press Enter to send a message.
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="card users-panel">
+                            <div class="users-header">
+                                <div class="section-title">People in Room</div>
+                                <div id="usersCount" class="users-count">0 users</div>
+                            </div>
+
+                            <div id="userList" class="user-list">
+                                <div class="empty-state">
+                                    No room joined.
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Create room modal -->
+    <div id="createRoomModal" class="modal-backdrop hidden">
+        <div class="card modal">
+            <h2>Create a Room</h2>
+            <p>
+                Create a public room or an invite-only room.
+                Invite-only rooms do not appear in the public room list.
+            </p>
+
+            <div class="form-group">
+                <label for="createRoomNameInput">Room name</label>
+                <input
+                    id="createRoomNameInput"
+                    type="text"
+                    maxlength="32"
+                    placeholder="Example: Chill Lobby"
+                    autocomplete="off"
+                >
             </div>
 
-        </section>
-
-        <div class="input-wrapper">
-
-            <form class="message-form" id="messageForm">
-
+            <div class="form-group">
+                <label for="createRoomMaxPlayersInput">Maximum players</label>
                 <input
-                    class="message-input"
-                    id="messageInput"
-                    type="text"
-                    maxlength="500"
-                    placeholder="Join a room to send messages..."
-                    autocomplete="off"
-                    disabled
+                    id="createRoomMaxPlayersInput"
+                    type="number"
+                    min="2"
+                    max="100"
+                    value="20"
                 >
+            </div>
 
-                <button
-                    class="send-button"
-                    id="sendButton"
-                    type="submit"
-                    disabled
-                >
-                    Send
+            <label class="checkbox-row">
+                <input id="privateRoomCheckbox" type="checkbox">
+                Make this room invite-only
+            </label>
+
+            <div class="modal-actions">
+                <button id="cancelCreateRoomButton" class="button secondary">
+                    Cancel
                 </button>
 
-            </form>
-
-            <div class="input-hint">
-                Press Enter to send · 500 character limit
-            </div>
-
-        </div>
-
-    </main>
-</div>
-
-<!-- ==============================
-     CREATE ROOM MODAL
-============================== -->
-
-<div class="modal-overlay" id="createRoomModal">
-
-    <div class="modal">
-
-        <h2>Create a room</h2>
-
-        <div class="modal-description">
-            Create a public room that appears in the room list,
-            or a private room that requires a room code.
-        </div>
-
-        <div class="form-group">
-            <label class="form-label" for="newRoomName">
-                Room name
-            </label>
-
-            <input
-                class="form-input"
-                id="newRoomName"
-                type="text"
-                maxlength="32"
-                placeholder="My awesome room"
-            >
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">
-                Room visibility
-            </label>
-
-            <div class="privacy-options">
-
-                <label
-                    class="privacy-option selected"
-                    id="publicOption"
-                >
-                    <input
-                        type="radio"
-                        name="roomPrivacy"
-                        value="public"
-                        checked
-                    >
-
-                    <strong>🌐 Public</strong>
-                    <span>
-                        Anyone can find and join this room.
-                    </span>
-                </label>
-
-                <label
-                    class="privacy-option"
-                    id="privateOption"
-                >
-                    <input
-                        type="radio"
-                        name="roomPrivacy"
-                        value="private"
-                    >
-
-                    <strong>🔒 Private</strong>
-                    <span>
-                        Join using the room's secret code.
-                    </span>
-                </label>
-
+                <button id="confirmCreateRoomButton" class="button">
+                    Create Room
+                </button>
             </div>
         </div>
-
-        <div class="form-group">
-            <label class="form-label" for="newRoomPassword">
-                Private room code
-            </label>
-
-            <input
-                class="form-input"
-                id="newRoomPassword"
-                type="text"
-                maxlength="32"
-                placeholder="Enter a room code"
-                disabled
-            >
-        </div>
-
-        <div class="error-text" id="createRoomError"></div>
-
-        <div class="modal-buttons">
-            <button
-                class="cancel-button"
-                id="cancelCreateButton"
-                type="button"
-            >
-                Cancel
-            </button>
-
-            <button
-                class="confirm-button"
-                id="confirmCreateButton"
-                type="button"
-            >
-                Create Room
-            </button>
-        </div>
-
     </div>
-</div>
 
-<!-- ==============================
-     PRIVATE ROOM JOIN MODAL
-============================== -->
+    <!-- Join room modal -->
+    <div id="joinRoomModal" class="modal-backdrop hidden">
+        <div class="card modal">
+            <h2>Join a Room</h2>
+            <p>
+                Enter the exact room name. Invite-only rooms must be joined
+                by their exact name.
+            </p>
 
-<div class="modal-overlay" id="joinPrivateModal">
+            <div class="form-group">
+                <label for="joinRoomNameInput">Room name</label>
+                <input
+                    id="joinRoomNameInput"
+                    type="text"
+                    maxlength="32"
+                    placeholder="Enter room name..."
+                    autocomplete="off"
+                >
+            </div>
 
-    <div class="modal">
+            <div class="modal-actions">
+                <button id="cancelJoinRoomButton" class="button secondary">
+                    Cancel
+                </button>
 
-        <h2>Private room</h2>
-
-        <div class="modal-description">
-            Enter the room code to join this private room.
+                <button id="confirmJoinRoomButton" class="button">
+                    Join Room
+                </button>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label class="form-label" for="privateCodeInput">
-                Room code
-            </label>
-
-            <input
-                class="form-input"
-                id="privateCodeInput"
-                type="password"
-                maxlength="32"
-                placeholder="Enter room code"
-            >
-        </div>
-
-        <div class="error-text" id="privateRoomError"></div>
-
-        <div class="modal-buttons">
-            <button
-                class="cancel-button"
-                id="cancelPrivateButton"
-                type="button"
-            >
-                Cancel
-            </button>
-
-            <button
-                class="confirm-button"
-                id="confirmPrivateButton"
-                type="button"
-            >
-                Join Room
-            </button>
-        </div>
-
     </div>
-</div>
 
-<div class="toast" id="toast"></div>
+    <div id="toastContainer" class="toast-container"></div>
 
-<!-- ==============================
-     PHOTON REALTIME SDK
-============================== -->
+    <script>
+        "use strict";
 
-<!--
-    IMPORTANT:
-    Download the official Photon Realtime JavaScript SDK
-    from Photon Engine and host the SDK file with your site.
+        /*
+         * ============================================================
+         * CONFIGURATION
+         * ============================================================
+         */
 
-    Replace this path with the location of photon.min.js
-    in your own hosted project.
+        // Replace this with your Photon Realtime App ID.
+        const PHOTON_APP_ID = "abeba99d-ecd9-49f1-abf3-5ee64391ce9e";
 
-    Example:
-    <script src="./photon.min.js"></script>
--->
+        // Change this if you use another Photon region.
+        // Common region codes include: "us", "eu", "asia", "jp", "au".
+        const PHOTON_REGION = "us";
 
-<script src="./photon.min.js"></script>
+        // Change this when you make a different version of your app.
+        const PHOTON_APP_VERSION = "1.0";
 
-<script>
-    // =====================================================
-    // PHOTON CONFIGURATION
-    // =====================================================
+        // Custom Photon event code used for chat messages.
+        const CHAT_EVENT_CODE = 1;
 
-    const PHOTON_APP_ID = "abeba99d-ecd9-49f1-abf3-5ee64391ce9e";
-    const PHOTON_APP_VERSION = "1.0";
+        /*
+         * ============================================================
+         * STATE
+         * ============================================================
+         */
 
-    // Choose a Photon region.
-    // Common examples include "us", "eu", "asia".
-    const PHOTON_REGION = "us";
+        let client = null;
+        let username = "";
+        let currentRoomName = "";
+        let connected = false;
+        let joinedRoom = false;
 
-    // =====================================================
-    // APPLICATION CONFIGURATION
-    // =====================================================
+        /*
+         * ============================================================
+         * DOM REFERENCES
+         * ============================================================
+         */
 
-    const MAX_MESSAGE_LENGTH = 500;
-    const MAX_ROOM_NAME_LENGTH = 32;
-    const MAX_ROOM_PLAYERS = 100;
+        const setupScreen = document.getElementById("setupScreen");
+        const chatScreen = document.getElementById("chatScreen");
 
-    // Photon event code for chat messages.
-    const EVENT_CHAT_MESSAGE = 1;
+        const usernameInput = document.getElementById("usernameInput");
+        const enterChatButton = document.getElementById("enterChatButton");
+        const setupError = document.getElementById("setupError");
 
-    // Photon room property used for private-room status.
-    const ROOM_PROPERTY_PRIVATE = "private";
+        const connectionDot = document.getElementById("connectionDot");
+        const connectionText = document.getElementById("connectionText");
+        const regionText = document.getElementById("regionText");
 
-    // Photon room property used for room description.
-    const ROOM_PROPERTY_DESCRIPTION = "description";
+        const roomList = document.getElementById("roomList");
+        const createRoomButton = document.getElementById("createRoomButton");
+        const joinRoomButton = document.getElementById("joinRoomButton");
+        const disconnectButton = document.getElementById("disconnectButton");
 
-    // Photon room property used for private-room password.
-    const ROOM_PROPERTY_PASSWORD = "password";
+        const profileAvatar = document.getElementById("profileAvatar");
+        const profileName = document.getElementById("profileName");
 
-    // =====================================================
-    // STATE
-    // =====================================================
+        const currentRoomNameElement = document.getElementById("currentRoomName");
+        const currentRoomSubtitle = document.getElementById("currentRoomSubtitle");
 
-    let client = null;
+        const leaveRoomButton = document.getElementById("leaveRoomButton");
 
-    let currentUsername = "";
-    let currentRoomName = "";
+        const messages = document.getElementById("messages");
+        const messageInput = document.getElementById("messageInput");
+        const sendButton = document.getElementById("sendButton");
 
-    let pendingPrivateRoom = null;
-    let pendingPrivateCode = "";
+        const userList = document.getElementById("userList");
+        const usersCount = document.getElementById("usersCount");
 
-    let isPhotonReady = false;
-    let isJoiningRoom = false;
+        const createRoomModal = document.getElementById("createRoomModal");
+        const createRoomNameInput = document.getElementById("createRoomNameInput");
+        const createRoomMaxPlayersInput = document.getElementById("createRoomMaxPlayersInput");
+        const privateRoomCheckbox = document.getElementById("privateRoomCheckbox");
+        const cancelCreateRoomButton = document.getElementById("cancelCreateRoomButton");
+        const confirmCreateRoomButton = document.getElementById("confirmCreateRoomButton");
 
-    // =====================================================
-    // DOM REFERENCES
-    // =====================================================
+        const joinRoomModal = document.getElementById("joinRoomModal");
+        const joinRoomNameInput = document.getElementById("joinRoomNameInput");
+        const cancelJoinRoomButton = document.getElementById("cancelJoinRoomButton");
+        const confirmJoinRoomButton = document.getElementById("confirmJoinRoomButton");
 
-    const loginOverlay = document.getElementById("loginOverlay");
-    const usernameInput = document.getElementById("usernameInput");
-    const loginButton = document.getElementById("loginButton");
-    const loginError = document.getElementById("loginError");
+        const toastContainer = document.getElementById("toastContainer");
 
-    const roomList = document.getElementById("roomList");
-    const memberList = document.getElementById("memberList");
-    const memberCount = document.getElementById("memberCount");
-    const topMemberCount = document.getElementById("topMemberCount");
+        /*
+         * ============================================================
+         * UTILITY FUNCTIONS
+         * ============================================================
+         */
 
-    const roomTitle = document.getElementById("roomTitle");
-    const roomDescription = document.getElementById("roomDescription");
-
-    const statusDot = document.getElementById("statusDot");
-    const statusText = document.getElementById("statusText");
-
-    const messages = document.getElementById("messages");
-    const messageForm = document.getElementById("messageForm");
-    const messageInput = document.getElementById("messageInput");
-    const sendButton = document.getElementById("sendButton");
-
-    const createRoomButton = document.getElementById("createRoomButton");
-    const createRoomModal = document.getElementById("createRoomModal");
-    const cancelCreateButton = document.getElementById("cancelCreateButton");
-    const confirmCreateButton = document.getElementById("confirmCreateButton");
-
-    const newRoomName = document.getElementById("newRoomName");
-    const newRoomPassword = document.getElementById("newRoomPassword");
-    const createRoomError = document.getElementById("createRoomError");
-
-    const publicOption = document.getElementById("publicOption");
-    const privateOption = document.getElementById("privateOption");
-
-    const joinPrivateModal = document.getElementById("joinPrivateModal");
-    const privateCodeInput = document.getElementById("privateCodeInput");
-    const privateRoomError = document.getElementById("privateRoomError");
-    const cancelPrivateButton = document.getElementById("cancelPrivateButton");
-    const confirmPrivateButton = document.getElementById("confirmPrivateButton");
-
-    const toast = document.getElementById("toast");
-
-    // =====================================================
-    // PROFILE COLOR SYSTEM
-    // =====================================================
-
-    // Generates a consistent color from a username.
-    // The same username gets the same color every time.
-    function getProfileColor(username) {
-        let hash = 0;
-
-        for (let i = 0; i < username.length; i++) {
-            hash = username.charCodeAt(i) + ((hash << 5) - hash);
-            hash = hash & hash;
+        function showSetupError(message) {
+            setupError.textContent = message;
+            setupError.classList.remove("hidden");
         }
 
-        const hue = Math.abs(hash) % 360;
-
-        return `hsl(${hue}, 65%, 58%)`;
-    }
-
-    function getInitials(username) {
-        const clean = username.trim();
-
-        if (!clean) {
-            return "?";
+        function hideSetupError() {
+            setupError.textContent = "";
+            setupError.classList.add("hidden");
         }
 
-        const parts = clean.split(/\s+/);
+        function showToast(message, type = "") {
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
 
-        if (parts.length >= 2) {
-            return (
-                parts[0].charAt(0) +
-                parts[1].charAt(0)
-            ).toUpperCase();
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 4500);
         }
 
-        return clean.substring(0, 2).toUpperCase();
-    }
+        function setConnectionStatus(status, type = "") {
+            connectionText.textContent = status;
 
-    // =====================================================
-    // STATUS / TOAST
-    // =====================================================
+            connectionDot.classList.remove("connected", "error");
 
-    function setStatus(text, type) {
-        statusText.textContent = text;
-
-        statusDot.className = "status-dot";
-
-        if (type === "connected") {
-            statusDot.classList.add("connected");
-        } else if (type === "connecting") {
-            statusDot.classList.add("connecting");
-        } else if (type === "error") {
-            statusDot.classList.add("error");
-        }
-    }
-
-    let toastTimeout;
-
-    function showToast(text) {
-        toast.textContent = text;
-        toast.classList.add("visible");
-
-        clearTimeout(toastTimeout);
-
-        toastTimeout = setTimeout(() => {
-            toast.classList.remove("visible");
-        }, 3500);
-    }
-
-    // =====================================================
-    // PHOTON INITIALIZATION
-    // =====================================================
-
-    function initializePhoton() {
-        if (
-            typeof Photon === "undefined" ||
-            !Photon.LoadBalancing
-        ) {
-            setStatus("SDK missing", "error");
-            showToast("Photon SDK was not loaded.");
-            console.error(
-                "Photon SDK missing. Host photon.min.js beside index.html."
-            );
-            return;
-        }
-
-        if (PHOTON_APP_ID === "YOUR_PHOTON_APP_ID") {
-            setStatus("App ID missing", "error");
-            showToast("Add your Photon App ID first.");
-            return;
-        }
-
-        client = new Photon.LoadBalancing.LoadBalancingClient(
-            Photon.ConnectionProtocol.Wss,
-            PHOTON_APP_ID,
-            PHOTON_APP_VERSION
-        );
-
-        // -------------------------------------------------
-        // CONNECTION CALLBACKS
-        // -------------------------------------------------
-
-        client.onStateChange = function(state) {
-            console.log("Photon state changed:", state);
-
-            const State =
-                Photon.LoadBalancing.LoadBalancingClient.State;
-
-            if (state === State.ConnectingToNameServer) {
-                setStatus("Connecting...", "connecting");
+            if (type === "connected") {
+                connectionDot.classList.add("connected");
             }
 
-            if (state === State.ConnectingToMasterserver) {
-                setStatus("Finding server...", "connecting");
+            if (type === "error") {
+                connectionDot.classList.add("error");
+            }
+        }
+
+        function getInitials(name) {
+            if (!name) return "?";
+
+            const trimmed = name.trim();
+
+            if (!trimmed) return "?";
+
+            const parts = trimmed.split(/\s+/);
+
+            if (parts.length >= 2) {
+                return (
+                    parts[0].charAt(0) +
+                    parts[parts.length - 1].charAt(0)
+                ).toUpperCase();
             }
 
-            if (state === State.JoinedLobby) {
-                isPhotonReady = true;
-                setStatus("Connected", "connected");
-                renderRoomList();
+            return trimmed.substring(0, 2).toUpperCase();
+        }
+
+        function formatTime() {
+            return new Date().toLocaleTimeString([], {
+                hour: "numeric",
+                minute: "2-digit"
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function scrollMessagesToBottom() {
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function clearMessages() {
+            messages.innerHTML = "";
+        }
+
+        function addSystemMessage(text, isError = false) {
+            const element = document.createElement("div");
+            element.className = `system-message${isError ? " error" : ""}`;
+            element.textContent = text;
+
+            messages.appendChild(element);
+            scrollMessagesToBottom();
+        }
+
+        function addChatMessage(sender, text, time = formatTime()) {
+            const messageElement = document.createElement("div");
+            messageElement.className = "message";
+
+            const safeSender = escapeHtml(sender || "Unknown");
+            const safeText = escapeHtml(text || "");
+            const initials = escapeHtml(getInitials(sender || "Unknown"));
+
+            messageElement.innerHTML = `
+                <div class="avatar">${initials}</div>
+
+                <div class="message-content">
+                    <div class="message-meta">
+                        <span class="message-author">${safeSender}</span>
+                        <span class="message-time">${escapeHtml(time)}</span>
+                    </div>
+
+                    <div class="message-text">${safeText}</div>
+                </div>
+            `;
+
+            messages.appendChild(messageElement);
+            scrollMessagesToBottom();
+        }
+
+        function updateProfile() {
+            profileName.textContent = username || "Unknown";
+            profileAvatar.textContent = getInitials(username);
+        }
+
+        function setRoomInterface(enabled) {
+            joinedRoom = enabled;
+
+            leaveRoomButton.disabled = !enabled;
+            messageInput.disabled = !enabled;
+            sendButton.disabled = !enabled;
+
+            if (enabled) {
+                messageInput.placeholder = "Type a message...";
+                messageInput.focus();
+            } else {
+                messageInput.placeholder = "Join a room to send messages...";
+            }
+        }
+
+        function getRoomActors() {
+            if (!client || typeof client.myRoomActors !== "function") {
+                return {};
             }
 
-            if (state === State.Joined) {
-                setStatus("Connected", "connected");
-            }
+            return client.myRoomActors() || {};
+        }
 
-            if (state === State.Disconnected) {
-                isPhotonReady = false;
-                setStatus("Disconnected", "error");
-                disableChatInput();
-            }
-        };
+        /*
+         * ============================================================
+         * PHOTON SETUP
+         * ============================================================
+         */
 
-        client.onError = function(errorCode, errorMsg) {
-            console.error(
-                "Photon peer error:",
-                errorCode,
-                errorMsg
-            );
-
-            setStatus("Connection error", "error");
-            showToast(errorMsg || "Photon connection error.");
-        };
-
-        client.onOperationResponse = function(
-            errorCode,
-            errorMsg,
-            code,
-            content
-        ) {
-            if (errorCode !== 0) {
-                console.warn(
-                    "Photon operation response:",
-                    errorCode,
-                    errorMsg,
-                    code,
-                    content
+        function initializePhoton() {
+            if (typeof Photon === "undefined") {
+                showSetupError(
+                    "Photon SDK could not be loaded. Make sure photon.min.js is in the same folder as index.html."
                 );
 
-                showToast(errorMsg || "Photon operation failed.");
+                setConnectionStatus("Photon SDK missing", "error");
+                return false;
             }
-        };
 
-        // -------------------------------------------------
-        // LOBBY CALLBACKS
-        // -------------------------------------------------
+            if (
+                !PHOTON_APP_ID ||
+                PHOTON_APP_ID === "PUT_YOUR_PHOTON_APP_ID_HERE"
+            ) {
+                showSetupError(
+                    "You need to put your Photon App ID into the PHOTON_APP_ID variable in this file."
+                );
 
-        client.onRoomList = function(rooms) {
-            console.log("Initial room list received:", rooms);
-            renderRoomList();
-        };
+                setConnectionStatus("App ID missing", "error");
+                return false;
+            }
 
-        client.onRoomListUpdate = function(
-            rooms,
-            roomsUpdated,
-            roomsAdded,
-            roomsRemoved
-        ) {
-            console.log("Room list updated.");
-            renderRoomList();
-        };
+            try {
+                client = new Photon.LoadBalancing.LoadBalancingClient(
+                    Photon.ConnectionProtocol.Wss,
+                    PHOTON_APP_ID,
+                    PHOTON_APP_VERSION
+                );
+            } catch (error) {
+                console.error("Photon initialization error:", error);
 
-        // -------------------------------------------------
-        // ROOM CALLBACKS
-        // -------------------------------------------------
+                showSetupError(
+                    "Photon could not initialize. Check the browser console for details."
+                );
 
-        client.onJoinRoom = function(createdByMe) {
-            isJoiningRoom = false;
+                setConnectionStatus("Initialization failed", "error");
+                return false;
+            }
 
-            const room = client.myRoom();
+            /*
+             * Photon connection state callback.
+             */
+            client.onStateChange = function (state) {
+                console.log("Photon state changed:", state);
 
-            currentRoomName = room.name;
+                if (
+                    typeof Photon.LoadBalancing.LoadBalancingClient.StateToName ===
+                    "function"
+                ) {
+                    console.log(
+                        "Photon state name:",
+                        Photon.LoadBalancing.LoadBalancingClient.StateToName(state)
+                    );
+                }
+            };
 
-            console.log(
-                createdByMe
-                    ? "Created and joined room:"
-                    : "Joined room:",
-                currentRoomName
+            /*
+             * Photon connection error callback.
+             */
+            client.onError = function (errorCode, errorMessage) {
+                console.error(
+                    "Photon error:",
+                    errorCode,
+                    errorMessage
+                );
+
+                connected = false;
+                setConnectionStatus("Connection error", "error");
+
+                showToast(
+                    `Photon error ${errorCode}: ${errorMessage || "Unknown error"}`,
+                    "error"
+                );
+            };
+
+            /*
+             * Called when the client successfully joins a room.
+             *
+             * Photon passes whether the room was created by this client.
+             */
+            client.onJoinRoom = function (createdByMe) {
+                joinedRoom = true;
+                connected = true;
+
+                const room = client.myRoom();
+
+                currentRoomName = room && room.name
+                    ? room.name
+                    : currentRoomName;
+
+                currentRoomNameElement.textContent =
+                    currentRoomName || "Chat Room";
+
+                currentRoomSubtitle.textContent =
+                    createdByMe
+                        ? "Room created successfully."
+                        : "You are connected to this room.";
+
+                setRoomInterface(true);
+                clearMessages();
+
+                addSystemMessage(
+                    `You joined ${currentRoomName || "the room"}.`
+                );
+
+                updateUserList();
+
+                showToast(
+                    `Joined ${currentRoomName || "the room"}.`,
+                    "success"
+                );
+
+                console.log("Successfully joined room:", currentRoomName);
+            };
+
+            /*
+             * Called when Photon provides the public room list.
+             */
+            client.onRoomList = function (rooms) {
+                console.log("Photon room list:", rooms);
+                renderRoomList(rooms);
+            };
+
+            /*
+             * Called when the public room list changes.
+             */
+            client.onRoomListUpdate = function (
+                rooms,
+                roomsUpdated,
+                roomsAdded,
+                roomsRemoved
+            ) {
+                console.log("Photon room list updated:", rooms);
+                renderRoomList(rooms);
+            };
+
+            /*
+             * Called when another actor joins the current room.
+             */
+            client.onActorJoin = function (actor) {
+                console.log("Actor joined:", actor);
+
+                const actorName = actor && actor.name
+                    ? actor.name
+                    : "A user";
+
+                addSystemMessage(`${actorName} joined the room.`);
+                updateUserList();
+            };
+
+            /*
+             * Called when an actor leaves the current room.
+             */
+            client.onActorLeave = function (actor) {
+                console.log("Actor left:", actor);
+
+                const actorName = actor && actor.name
+                    ? actor.name
+                    : "A user";
+
+                addSystemMessage(`${actorName} left the room.`);
+                updateUserList();
+            };
+
+            /*
+             * THIS IS THE IMPORTANT FIX.
+             *
+             * Photon JavaScript uses:
+             *
+             * client.onEvent = function(code, content, actorNr) {}
+             *
+             * It does not pass an eventData object.
+             */
+            client.onEvent = function (code, content, actorNr) {
+                console.log(
+                    "Photon event received:",
+                    code,
+                    content,
+                    actorNr
+                );
+
+                if (code !== CHAT_EVENT_CODE) {
+                    return;
+                }
+
+                if (!content || typeof content !== "object") {
+                    console.warn(
+                        "Received a chat event with invalid content:",
+                        content
+                    );
+                    return;
+                }
+
+                const senderName =
+                    content.sender ||
+                    content.username ||
+                    `Player ${actorNr}`;
+
+                const messageText =
+                    content.message ||
+                    content.text ||
+                    "";
+
+                if (
+                    typeof messageText !== "string" ||
+                    !messageText.trim()
+                ) {
+                    console.warn(
+                        "Received a chat event without message text:",
+                        content
+                    );
+                    return;
+                }
+
+                addChatMessage(senderName, messageText);
+            };
+
+            /*
+             * Optional operation-response logging.
+             * This helps identify failed joins, room creation errors, etc.
+             */
+            client.onOperationResponse = function (
+                errorCode,
+                errorMessage,
+                operationCode,
+                parameters
+            ) {
+                console.log(
+                    "Photon operation response:",
+                    {
+                        errorCode,
+                        errorMessage,
+                        operationCode,
+                        parameters
+                    }
+                );
+
+                if (errorCode && errorCode !== 0) {
+                    showToast(
+                        `Photon operation failed: ${errorMessage || errorCode}`,
+                        "error"
+                    );
+                }
+            };
+
+            regionText.textContent = `Region: ${PHOTON_REGION.toUpperCase()}`;
+
+            return true;
+        }
+
+        function connectToPhoton() {
+            if (!client) {
+                const initialized = initializePhoton();
+
+                if (!initialized) {
+                    return;
+                }
+            }
+
+            try {
+                setConnectionStatus("Connecting...");
+
+                client.setUserId(username);
+
+                const started = client.connectToRegionMaster(PHOTON_REGION);
+
+                if (!started) {
+                    setConnectionStatus("Connection did not start", "error");
+
+                    showToast(
+                        "Photon could not start the connection. Check your App ID and region.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                connected = true;
+                setConnectionStatus("Connecting...");
+            } catch (error) {
+                console.error("Photon connection error:", error);
+
+                connected = false;
+                setConnectionStatus("Connection failed", "error");
+
+                showToast(
+                    "Could not connect to Photon. Check the browser console.",
+                    "error"
+                );
+            }
+        }
+
+        /*
+         * ============================================================
+         * ROOM FUNCTIONS
+         * ============================================================
+         */
+
+        function renderRoomList(rooms) {
+            roomList.innerHTML = "";
+
+            if (!Array.isArray(rooms) || rooms.length === 0) {
+                roomList.innerHTML = `
+                    <div class="empty-state">
+                        No public rooms are available yet.
+                        Create one to get started.
+                    </div>
+                `;
+                return;
+            }
+
+            let visibleRoomCount = 0;
+
+            rooms.forEach((room) => {
+                if (!room) return;
+
+                // Invisible/private rooms should not be shown.
+                if (room.isVisible === false) {
+                    return;
+                }
+
+                visibleRoomCount++;
+
+                const roomName = room.name || "Unnamed Room";
+                const playerCount =
+                    typeof room.playerCount === "number"
+                        ? room.playerCount
+                        : 0;
+
+                const maxPlayers =
+                    typeof room.maxPlayers === "number" &&
+                    room.maxPlayers > 0
+                        ? room.maxPlayers
+                        : "∞";
+
+                const roomButton = document.createElement("button");
+                roomButton.className = "room-item";
+
+                roomButton.innerHTML = `
+                    <div class="room-item-name"></div>
+                    <div class="room-item-info">
+                        ${playerCount}/${maxPlayers} players
+                    </div>
+                `;
+
+                roomButton.querySelector(".room-item-name").textContent =
+                    roomName;
+
+                roomButton.addEventListener("click", () => {
+                    joinRoom(roomName);
+                });
+
+                roomList.appendChild(roomButton);
+            });
+
+            if (visibleRoomCount === 0) {
+                roomList.innerHTML = `
+                    <div class="empty-state">
+                        No public rooms are available yet.
+                        Create one to get started.
+                    </div>
+                `;
+            }
+        }
+
+        function createRoom(roomName, maxPlayers, isPrivate) {
+            if (!client) {
+                showToast("Photon is not initialized.", "error");
+                return;
+            }
+
+            if (!connected) {
+                showToast("You are not connected to Photon yet.", "error");
+                return;
+            }
+
+            if (
+                typeof client.isConnectedToMaster === "function" &&
+                !client.isConnectedToMaster()
+            ) {
+                showToast(
+                    "You are not connected to the Photon lobby yet.",
+                    "error"
+                );
+                return;
+            }
+
+            if (!roomName || !roomName.trim()) {
+                showToast("Enter a room name.", "error");
+                return;
+            }
+
+            const cleanRoomName = roomName.trim();
+
+            if (cleanRoomName.length < 2) {
+                showToast(
+                    "Room names must be at least 2 characters long.",
+                    "error"
+                );
+                return;
+            }
+
+            const playerLimit = Math.max(
+                2,
+                Math.min(100, Number(maxPlayers) || 20)
             );
 
-            closeAllModals();
+            try {
+                const options = {
+                    isVisible: !isPrivate,
+                    isOpen: true,
+                    maxPlayers: playerLimit
+                };
 
-            roomTitle.textContent = currentRoomName;
+                console.log("Creating room:", cleanRoomName, options);
 
-            const isPrivate =
-                room.getCustomProperties &&
-                room.getCustomProperties()[ROOM_PROPERTY_PRIVATE];
+                const started = client.createRoom(
+                    cleanRoomName,
+                    options
+                );
 
-            roomDescription.textContent = isPrivate
-                ? "Private room"
-                : "Public room";
+                if (!started) {
+                    showToast(
+                        "Photon rejected the room creation request.",
+                        "error"
+                    );
+                }
+            } catch (error) {
+                console.error("Create room error:", error);
+
+                showToast(
+                    "Could not create the room. Check the console.",
+                    "error"
+                );
+            }
+        }
+
+        function joinRoom(roomName) {
+            if (!client) {
+                showToast("Photon is not initialized.", "error");
+                return;
+            }
+
+            if (!connected) {
+                showToast("You are not connected to Photon yet.", "error");
+                return;
+            }
+
+            if (!roomName || !roomName.trim()) {
+                showToast("Enter a room name.", "error");
+                return;
+            }
+
+            const cleanRoomName = roomName.trim();
+
+            try {
+                console.log("Joining room:", cleanRoomName);
+
+                const started = client.joinRoom(cleanRoomName);
+
+                if (!started) {
+                    showToast(
+                        "Photon rejected the room join request.",
+                        "error"
+                    );
+                }
+            } catch (error) {
+                console.error("Join room error:", error);
+
+                showToast(
+                    "Could not join the room. It may not exist, may be full, or may be closed.",
+                    "error"
+                );
+            }
+        }
+
+        function leaveCurrentRoom() {
+            if (!client) return;
+
+            if (
+                typeof client.isJoinedToRoom === "function" &&
+                client.isJoinedToRoom()
+            ) {
+                try {
+                    client.leaveRoom();
+                } catch (error) {
+                    console.error("Leave room error:", error);
+                }
+            }
+
+            joinedRoom = false;
+            currentRoomName = "";
+
+            currentRoomNameElement.textContent = "No room joined";
+            currentRoomSubtitle.textContent =
+                "Join or create a room to begin chatting.";
 
             clearMessages();
+            addSystemMessage("You left the room.");
 
-            addSystemMessage(
-                createdByMe
-                    ? "Room created. Welcome!"
-                    : "You joined the room."
-            );
+            setRoomInterface(false);
+            updateUserList();
+        }
 
-            enableChatInput();
-            updateMemberList();
+        /*
+         * ============================================================
+         * CHAT FUNCTIONS
+         * ============================================================
+         */
 
-            setStatus("Connected", "connected");
-            showToast("Joined #" + currentRoomName);
-        };
+        function sendChatMessage() {
+            const message = messageInput.value.trim();
 
-        client.onActorJoin = function(actor) {
-            if (actor !== client.myActor()) {
+            console.log("Send button pressed.");
+            console.log("Message:", message);
+            console.log("Photon client:", client);
+            console.log("Joined room:", joinedRoom);
+
+            if (!message) {
+                return;
+            }
+
+            if (!client) {
                 addSystemMessage(
-                    (actor.name || "Someone") +
-                    " joined the room."
+                    "Photon is not initialized.",
+                    true
+                );
+
+                return;
+            }
+
+            if (
+                typeof client.isJoinedToRoom === "function" &&
+                !client.isJoinedToRoom()
+            ) {
+                addSystemMessage(
+                    "You must join a room before sending messages.",
+                    true
+                );
+
+                return;
+            }
+
+            if (!joinedRoom) {
+                addSystemMessage(
+                    "You must join a room before sending messages.",
+                    true
+                );
+
+                return;
+            }
+
+            const messageData = {
+                sender: username,
+                message: message
+            };
+
+            try {
+                /*
+                 * Photon custom event:
+                 *
+                 * Event code: CHAT_EVENT_CODE
+                 * Data: messageData
+                 * Receivers: everyone in the room
+                 */
+                client.raiseEvent(
+                    CHAT_EVENT_CODE,
+                    messageData,
+                    {
+                        receivers:
+                            Photon.LoadBalancing.Constants.ReceiverGroup.All
+                    }
+                );
+
+                console.log("Chat event sent:", messageData);
+
+                messageInput.value = "";
+                messageInput.focus();
+            } catch (error) {
+                console.error("Send message error:", error);
+
+                addSystemMessage(
+                    "The message could not be sent. Check the browser console.",
+                    true
                 );
             }
+        }
 
-            updateMemberList();
-        };
+        /*
+         * ============================================================
+         * USER LIST
+         * ============================================================
+         */
 
-        client.onActorLeave = function(actor) {
-            addSystemMessage(
-                (actor.name || "Someone") +
-                " left the room."
-            );
+        function updateUserList() {
+            userList.innerHTML = "";
 
-            updateMemberList();
-        };
+            if (!client || !joinedRoom) {
+                usersCount.textContent = "0 users";
 
-        client.onMyRoomPropertiesChange = function() {
-            updateCurrentRoomInfo();
-        };
+                userList.innerHTML = `
+                    <div class="empty-state">
+                        No room joined.
+                    </div>
+                `;
 
-        // -------------------------------------------------
-        // CUSTOM EVENTS
-        // -------------------------------------------------
-
-        client.onEvent = function(code, content, actorNr) {
-            if (code !== EVENT_CHAT_MESSAGE) {
                 return;
             }
 
-            if (!content || typeof content.message !== "string") {
+            const actors = getRoomActors();
+            const actorEntries = Object.entries(actors);
+
+            usersCount.textContent =
+                `${actorEntries.length} user${actorEntries.length === 1 ? "" : "s"}`;
+
+            if (actorEntries.length === 0) {
+                userList.innerHTML = `
+                    <div class="empty-state">
+                        No users found.
+                    </div>
+                `;
+
                 return;
             }
 
-            const sender = client.myRoom().getActorByNr(actorNr);
+            actorEntries.forEach(([actorNumber, actor]) => {
+                const actorName =
+                    actor && actor.name
+                        ? actor.name
+                        : `Player ${actorNumber}`;
 
-            const senderName = sender
-                ? sender.name
-                : "Unknown User";
+                const chip = document.createElement("div");
+                chip.className = "user-chip";
 
-            const isOwnMessage =
-                sender &&
-                sender === client.myActor();
+                const dot = document.createElement("span");
+                dot.className = "mini-dot";
 
-            addChatMessage(
-                senderName,
-                content.message,
-                content.timestamp || Date.now(),
-                isOwnMessage
-            );
-        };
+                const name = document.createElement("span");
+                name.textContent = actorName;
 
-        // -------------------------------------------------
-        // CONNECT
-        // -------------------------------------------------
+                chip.appendChild(dot);
+                chip.appendChild(name);
 
-        setStatus("Connecting...", "connecting");
-
-        // Connect to the selected Photon region.
-        // Once connected, Photon calls onStateChange.
-        client.connectToRegionMaster(PHOTON_REGION);
-    }
-
-    // =====================================================
-    // LOGIN
-    // =====================================================
-
-    function enterChat() {
-        const name = usernameInput.value.trim();
-
-        if (name.length < 2) {
-            loginError.textContent =
-                "Please enter at least 2 characters.";
-            return;
+                userList.appendChild(chip);
+            });
         }
 
-        if (name.length > 24) {
-            loginError.textContent =
-                "Username must be 24 characters or fewer.";
-            return;
+        /*
+         * ============================================================
+         * MODALS
+         * ============================================================
+         */
+
+        function openModal(modal) {
+            modal.classList.remove("hidden");
         }
 
-        currentUsername = name;
-
-        if (!client) {
-            initializePhoton();
+        function closeModal(modal) {
+            modal.classList.add("hidden");
         }
 
-        if (client) {
-            client.myActor().name = currentUsername;
-        }
+        /*
+         * ============================================================
+         * EVENT LISTENERS
+         * ============================================================
+         */
 
-        loginOverlay.classList.add("hidden");
-    }
+        enterChatButton.addEventListener("click", () => {
+            hideSetupError();
 
-    loginButton.addEventListener("click", enterChat);
+            const enteredName = usernameInput.value.trim();
 
-    usernameInput.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            enterChat();
-        }
-    });
-
-    // =====================================================
-    // ROOM LIST
-    // =====================================================
-
-    function renderRoomList() {
-        if (!client || !isPhotonReady) {
-            roomList.innerHTML = `
-                <div class="room-help">
-                    Connecting to Photon...
-                </div>
-            `;
-            return;
-        }
-
-        const rooms = client.availableRooms();
-
-        roomList.innerHTML = "";
-
-        if (!rooms || rooms.length === 0) {
-            roomList.innerHTML = `
-                <div class="room-help">
-                    No public rooms yet.<br>
-                    Create one to get started!
-                </div>
-            `;
-            return;
-        }
-
-        rooms.forEach(room => {
-            const properties = room.customProperties || {};
-
-            const isPrivate =
-                properties[ROOM_PROPERTY_PRIVATE] === true;
-
-            const item = document.createElement("div");
-            item.className = "room-item";
-
-            if (room.name === currentRoomName) {
-                item.classList.add("active");
+            if (!enteredName) {
+                showSetupError("Please enter a display name.");
+                return;
             }
 
-            const name = document.createElement("span");
-            name.className = "room-name";
-            name.textContent = room.name;
-
-            item.appendChild(name);
-
-            if (isPrivate) {
-                const badge = document.createElement("span");
-                badge.className = "private-badge";
-                badge.textContent = "LOCKED";
-                item.appendChild(badge);
-
-                item.addEventListener("click", function() {
-                    openPrivateRoom(room);
-                });
-            } else {
-                item.addEventListener("click", function() {
-                    joinPublicRoom(room.name);
-                });
+            if (enteredName.length < 2) {
+                showSetupError(
+                    "Your display name must be at least 2 characters long."
+                );
+                return;
             }
 
-            roomList.appendChild(item);
-        });
-    }
+            username = enteredName.substring(0, 24);
 
-    // =====================================================
-    // CREATE ROOM MODAL
-    // =====================================================
+            updateProfile();
 
-    function openCreateRoomModal() {
-        newRoomName.value = "";
-        newRoomPassword.value = "";
-        newRoomPassword.disabled = true;
-        createRoomError.style.display = "none";
+            setupScreen.classList.add("hidden");
+            chatScreen.classList.remove("hidden");
 
-        document.querySelector(
-            'input[name="roomPrivacy"][value="public"]'
-        ).checked = true;
-
-        publicOption.classList.add("selected");
-        privateOption.classList.remove("selected");
-
-        createRoomModal.classList.add("visible");
-    }
-
-    function closeCreateRoomModal() {
-        createRoomModal.classList.remove("visible");
-    }
-
-    createRoomButton.addEventListener(
-        "click",
-        openCreateRoomModal
-    );
-
-    cancelCreateButton.addEventListener(
-        "click",
-        closeCreateRoomModal
-    );
-
-    publicOption.addEventListener("click", function() {
-        newRoomPassword.disabled = true;
-        publicOption.classList.add("selected");
-        privateOption.classList.remove("selected");
-    });
-
-    privateOption.addEventListener("click", function() {
-        newRoomPassword.disabled = false;
-        privateOption.classList.add("selected");
-        publicOption.classList.remove("selected");
-    });
-
-    confirmCreateButton.addEventListener(
-        "click",
-        createRoom
-    );
-
-    function createRoom() {
-        if (!client || !isPhotonReady) {
-            showToast("Photon is not connected yet.");
-            return;
-        }
-
-        const name = newRoomName.value.trim();
-
-        const isPrivate =
-            document.querySelector(
-                'input[name="roomPrivacy"]:checked'
-            ).value === "private";
-
-        const password = newRoomPassword.value.trim();
-
-        if (!name) {
-            showCreateError("Enter a room name.");
-            return;
-        }
-
-        if (name.length > MAX_ROOM_NAME_LENGTH) {
-            showCreateError(
-                "Room name is too long."
-            );
-            return;
-        }
-
-        if (isPrivate && !password) {
-            showCreateError(
-                "Enter a code for the private room."
-            );
-            return;
-        }
-
-        if (isJoiningRoom) {
-            return;
-        }
-
-        isJoiningRoom = true;
-
-        const roomProperties = {};
-
-        roomProperties[ROOM_PROPERTY_PRIVATE] = isPrivate;
-        roomProperties[ROOM_PROPERTY_DESCRIPTION] =
-            isPrivate ? "Private room" : "Public room";
-
-        if (isPrivate) {
-            roomProperties[ROOM_PROPERTY_PASSWORD] = password;
-        }
-
-        const roomOptions = {
-            isVisible: !isPrivate,
-            isOpen: true,
-            maxPlayers: MAX_ROOM_PLAYERS,
-            customGameProperties: roomProperties,
-            propsListedInLobby: [
-                ROOM_PROPERTY_PRIVATE,
-                ROOM_PROPERTY_DESCRIPTION
-            ]
-        };
-
-        // For private rooms, Photon hides the room from
-        // the public lobby. The room name is still required
-        // to join it.
-        client.createRoom(name, roomOptions);
-
-        setStatus("Creating room...", "connecting");
-    }
-
-    function showCreateError(text) {
-        createRoomError.textContent = text;
-        createRoomError.style.display = "block";
-    }
-
-    // =====================================================
-    // JOIN PUBLIC ROOM
-    // =====================================================
-
-    function joinPublicRoom(name) {
-        if (!client || !isPhotonReady || isJoiningRoom) {
-            return;
-        }
-
-        if (name === currentRoomName) {
-            return;
-        }
-
-        isJoiningRoom = true;
-
-        client.joinRoom(name, {
-            createIfNotExists: false
+            connectToPhoton();
         });
 
-        setStatus("Joining room...", "connecting");
-    }
-
-    // =====================================================
-    // PRIVATE ROOMS
-    // =====================================================
-
-    function openPrivateRoom(room) {
-        pendingPrivateRoom = room;
-        pendingPrivateCode = "";
-
-        privateCodeInput.value = "";
-        privateRoomError.style.display = "none";
-
-        joinPrivateModal.classList.add("visible");
-
-        setTimeout(() => {
-            privateCodeInput.focus();
-        }, 100);
-    }
-
-    function closePrivateRoomModal() {
-        joinPrivateModal.classList.remove("visible");
-        pendingPrivateRoom = null;
-    }
-
-    cancelPrivateButton.addEventListener(
-        "click",
-        closePrivateRoomModal
-    );
-
-    confirmPrivateButton.addEventListener(
-        "click",
-        confirmPrivateRoom
-    );
-
-    privateCodeInput.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            confirmPrivateRoom();
-        }
-    });
-
-    function confirmPrivateRoom() {
-        if (!pendingPrivateRoom) {
-            return;
-        }
-
-        const code = privateCodeInput.value.trim();
-
-        if (!code) {
-            privateRoomError.textContent =
-                "Enter the room code.";
-            privateRoomError.style.display = "block";
-            return;
-        }
-
-        const room = pendingPrivateRoom;
-        const properties = room.customProperties || {};
-
-        // -------------------------------------------------
-        // IMPORTANT SECURITY NOTE:
-        //
-        // This is a client-side password check.
-        // It is suitable for a basic prototype but is
-        // NOT secure against someone inspecting the
-        // JavaScript or Photon room properties.
-        //
-        // For real private rooms, use a backend/custom
-        // authentication system or a server-side plugin.
-        // -------------------------------------------------
-
-        if (properties[ROOM_PROPERTY_PASSWORD] !== code) {
-            privateRoomError.textContent =
-                "Incorrect room code.";
-            privateRoomError.style.display = "block";
-            return;
-        }
-
-        if (!client || !isPhotonReady || isJoiningRoom) {
-            return;
-        }
-
-        isJoiningRoom = true;
-
-        client.joinRoom(room.name, {
-            createIfNotExists: false
-        });
-
-        closePrivateRoomModal();
-
-        setStatus("Joining private room...", "connecting");
-    }
-
-    // =====================================================
-    // MESSAGES
-    // =====================================================
-
-    messageForm.addEventListener("submit", function(event) {
-        event.preventDefault();
-        sendMessage();
-    });
-
-    function enableChatInput() {
-        messageInput.disabled = false;
-        sendButton.disabled = false;
-        messageInput.placeholder = "Message #" + currentRoomName;
-    }
-
-    function disableChatInput() {
-        messageInput.disabled = true;
-        sendButton.disabled = true;
-        messageInput.placeholder =
-            "Join a room to send messages...";
-    }
-
-    function sendMessage() {
-        if (
-            !client ||
-            !client.isJoinedToRoom() ||
-            !messageInput.value.trim()
-        ) {
-            return;
-        }
-
-        const text = messageInput.value.trim();
-
-        if (text.length > MAX_MESSAGE_LENGTH) {
-            showToast("Message is too long.");
-            return;
-        }
-
-        client.raiseEvent(
-            EVENT_CHAT_MESSAGE,
-            {
-                message: text,
-                timestamp: Date.now()
-            },
-            {
-                receivers:
-                    Photon.LoadBalancing.Constants.ReceiverGroup.All
+        usernameInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                enterChatButton.click();
             }
-        );
-
-        messageInput.value = "";
-        messageInput.focus();
-    }
-
-    function addChatMessage(
-        username,
-        text,
-        timestamp,
-        ownMessage
-    ) {
-        const welcome = messages.querySelector(".welcome");
-        if (welcome) {
-            welcome.remove();
-        }
-
-        const empty = messages.querySelector(".empty-room");
-        if (empty) {
-            empty.remove();
-        }
-
-        const message = document.createElement("div");
-        message.className = "message";
-
-        const avatar = document.createElement("div");
-        avatar.className = "avatar message-avatar";
-        avatar.style.background = getProfileColor(username);
-        avatar.textContent = getInitials(username);
-
-        const content = document.createElement("div");
-        content.className = "message-content";
-
-        const header = document.createElement("div");
-        header.className = "message-header";
-
-        const author = document.createElement("span");
-        author.className = "message-author";
-        author.style.color = getProfileColor(username);
-        author.textContent = username;
-
-        const time = document.createElement("span");
-        time.className = "message-time";
-        time.textContent = formatTime(timestamp);
-
-        const messageText = document.createElement("div");
-        messageText.className = "message-text";
-
-        // textContent prevents HTML injection.
-        messageText.textContent = text;
-
-        header.appendChild(author);
-        header.appendChild(time);
-
-        content.appendChild(header);
-        content.appendChild(messageText);
-
-        message.appendChild(avatar);
-        message.appendChild(content);
-
-        messages.appendChild(message);
-
-        messages.scrollTop = messages.scrollHeight;
-    }
-
-    function addSystemMessage(text) {
-        const welcome = messages.querySelector(".welcome");
-        if (welcome) {
-            welcome.remove();
-        }
-
-        const element = document.createElement("div");
-        element.className = "system-message";
-        element.textContent = text;
-
-        messages.appendChild(element);
-        messages.scrollTop = messages.scrollHeight;
-    }
-
-    function clearMessages() {
-        messages.innerHTML = `
-            <div class="empty-room">
-                No messages yet. Start the conversation!
-            </div>
-        `;
-    }
-
-    function formatTime(timestamp) {
-        const date = new Date(timestamp);
-
-        return date.toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit"
         });
-    }
 
-    // =====================================================
-    // MEMBER LIST
-    // =====================================================
+        createRoomButton.addEventListener("click", () => {
+            createRoomNameInput.value = "";
+            createRoomMaxPlayersInput.value = "20";
+            privateRoomCheckbox.checked = false;
 
-    function updateMemberList() {
-        memberList.innerHTML = "";
-
-        if (!client || !client.isJoinedToRoom()) {
-            memberCount.textContent = "0";
-            topMemberCount.textContent = "0 members";
-            return;
-        }
-
-        const actors = client.myRoomActors();
-        const actorArray = Object.values(actors);
-
-        memberCount.textContent = actorArray.length;
-        topMemberCount.textContent =
-            actorArray.length +
-            (actorArray.length === 1 ? " member" : " members");
-
-        actorArray.forEach(actor => {
-            const name = actor.name || "Unnamed User";
-
-            const item = document.createElement("div");
-            item.className = "member";
-
-            const avatar = document.createElement("div");
-            avatar.className = "avatar";
-            avatar.style.background = getProfileColor(name);
-            avatar.textContent = getInitials(name);
-
-            const memberName = document.createElement("span");
-            memberName.className = "member-name";
-            memberName.textContent = name;
-
-            const dot = document.createElement("span");
-            dot.className = "online-dot";
-
-            item.appendChild(avatar);
-            item.appendChild(memberName);
-            item.appendChild(dot);
-
-            memberList.appendChild(item);
+            openModal(createRoomModal);
+            setTimeout(() => createRoomNameInput.focus(), 50);
         });
-    }
 
-    function updateCurrentRoomInfo() {
-        if (!client || !client.isJoinedToRoom()) {
-            return;
-        }
+        cancelCreateRoomButton.addEventListener("click", () => {
+            closeModal(createRoomModal);
+        });
 
-        const room = client.myRoom();
-        const properties = room.customProperties || {};
+        confirmCreateRoomButton.addEventListener("click", () => {
+            const roomName = createRoomNameInput.value.trim();
+            const maxPlayers = createRoomMaxPlayersInput.value;
+            const isPrivate = privateRoomCheckbox.checked;
 
-        roomDescription.textContent =
-            properties[ROOM_PROPERTY_PRIVATE]
-                ? "Private room"
-                : "Public room";
-    }
+            if (!roomName) {
+                showToast("Enter a room name.", "error");
+                return;
+            }
 
-    // =====================================================
-    // MODAL HELPERS
-    // =====================================================
+            closeModal(createRoomModal);
 
-    function closeAllModals() {
-        createRoomModal.classList.remove("visible");
-        joinPrivateModal.classList.remove("visible");
-    }
+            createRoom(roomName, maxPlayers, isPrivate);
+        });
 
-    createRoomModal.addEventListener("click", function(event) {
-        if (event.target === createRoomModal) {
-            closeCreateRoomModal();
-        }
-    });
+        createRoomNameInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                confirmCreateRoomButton.click();
+            }
+        });
 
-    joinPrivateModal.addEventListener("click", function(event) {
-        if (event.target === joinPrivateModal) {
-            closePrivateRoomModal();
-        }
-    });
+        joinRoomButton.addEventListener("click", () => {
+            joinRoomNameInput.value = "";
 
-    // =====================================================
-    // START
-    // =====================================================
+            openModal(joinRoomModal);
+            setTimeout(() => joinRoomNameInput.focus(), 50);
+        });
 
-    // Photon is initialized when the user enters a name.
-    // This avoids connecting before the user has chosen
-    // their display name.
-</script>
-```
+        cancelJoinRoomButton.addEventListener("click", () => {
+            closeModal(joinRoomModal);
+        });
 
+        confirmJoinRoomButton.addEventListener("click", () => {
+            const roomName = joinRoomNameInput.value.trim();
+
+            if (!roomName) {
+                showToast("Enter a room name.", "error");
+                return;
+            }
+
+            closeModal(joinRoomModal);
+            joinRoom(roomName);
+        });
+
+        joinRoomNameInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                confirmJoinRoomButton.click();
+            }
+        });
+
+        leaveRoomButton.addEventListener("click", () => {
+            leaveCurrentRoom();
+        });
+
+        sendButton.addEventListener("click", () => {
+            sendChatMessage();
+        });
+
+        messageInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendChatMessage();
+            }
+        });
+
+        disconnectButton.addEventListener("click", () => {
+            if (client) {
+                try {
+                    client.disconnect();
+                } catch (error) {
+                    console.error("Disconnect error:", error);
+                }
+            }
+
+            connected = false;
+            joinedRoom = false;
+            currentRoomName = "";
+
+            setConnectionStatus("Disconnected");
+            setRoomInterface(false);
+
+            chatScreen.classList.add("hidden");
+            setupScreen.classList.remove("hidden");
+
+            username = "";
+            usernameInput.value = "";
+            clearMessages();
+
+            showToast("Disconnected from SuperChat.");
+        });
+
+        /*
+         * Close modals when clicking the dark background.
+         */
+        createRoomModal.addEventListener("click", (event) => {
+            if (event.target === createRoomModal) {
+                closeModal(createRoomModal);
+            }
+        });
+
+        joinRoomModal.addEventListener("click", (event) => {
+            if (event.target === joinRoomModal) {
+                closeModal(joinRoomModal);
+            }
+        });
+
+        /*
+         * Escape key closes open modals.
+         */
+        document.addEventListener("keydown", (event) => {
+            if (event.key !== "Escape") return;
+
+            closeModal(createRoomModal);
+            closeModal(joinRoomModal);
+        });
+
+        /*
+         * ============================================================
+         * INITIAL STATE
+         * ============================================================
+         */
+
+        setConnectionStatus("Disconnected");
+        setRoomInterface(false);
+
+        console.log("SuperChat loaded.");
+        console.log("Photon SDK available:", typeof Photon !== "undefined");
+    </script>
 </body>
 </html>
